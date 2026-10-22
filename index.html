@@ -1,0 +1,790 @@
+<!DOCTYPE html><html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FileDrop — Upload Tester</title><style>
+    * {
+        box-sizing: border-box;
+    }
+
+    :root {
+        color-scheme: dark;
+        --bg: #09090b;
+        --panel: #121216;
+        --border: #29292f;
+        --text: #f4f4f5;
+        --muted: #92929f;
+        --accent: #a3e635;
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 28px 16px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, system-ui, -apple-system, sans-serif;
+    }
+
+    .app {
+        width: 100%;
+        max-width: 760px;
+        margin: 0 auto;
+    }
+
+    header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 38px;
+    }
+
+    .logo {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 13px;
+        background: var(--accent);
+        color: #101010;
+        font-size: 23px;
+        font-weight: 900;
+    }
+
+    header h1 {
+        margin: 0;
+        font-size: 21px;
+    }
+
+    header p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+    }
+
+    .badge {
+        margin-left: auto;
+        padding: 7px 10px;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        color: var(--muted);
+        font-size: 11px;
+    }
+
+    .hero {
+        margin-bottom: 25px;
+    }
+
+    .hero h2 {
+        margin: 0 0 10px;
+        font-size: clamp(28px, 6vw, 42px);
+        letter-spacing: -1.5px;
+    }
+
+    .hero p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.7;
+        font-size: 14px;
+    }
+
+    .card {
+        padding: 24px;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        background: var(--panel);
+    }
+
+    .dropzone {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 250px;
+        padding: 25px 16px;
+        border: 1px dashed #484852;
+        border-radius: 15px;
+        background: #0c0c0f;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color .2s, background .2s;
+    }
+
+    .dropzone:hover,
+    .dropzone.dragging {
+        border-color: var(--accent);
+        background: #141a0d;
+    }
+
+    .upload-icon {
+        display: grid;
+        place-items: center;
+        width: 60px;
+        height: 60px;
+        margin-bottom: 18px;
+        border: 1px solid #34343b;
+        border-radius: 18px;
+        font-size: 27px;
+    }
+
+    .dropzone h3 {
+        margin: 0 0 8px;
+        font-size: 17px;
+    }
+
+    .dropzone p {
+        margin: 0 0 17px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 43px;
+        padding: 0 17px;
+        border: 0;
+        border-radius: 10px;
+        background: var(--accent);
+        color: #151515;
+        font-size: 13px;
+        font-weight: 750;
+        cursor: pointer;
+    }
+
+    .button:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+
+    input[type="file"] {
+        display: none;
+    }
+
+    .file-list {
+        display: grid;
+        gap: 12px;
+        margin-top: 20px;
+    }
+
+    .file-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: #0c0c0f;
+    }
+
+    .thumbnail {
+        display: grid;
+        flex-shrink: 0;
+        place-items: center;
+        width: 54px;
+        height: 54px;
+        overflow: hidden;
+        border-radius: 9px;
+        background: #202026;
+        font-size: 23px;
+    }
+
+    .thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .file-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .file-name {
+        overflow-wrap: anywhere;
+        font-size: 13px;
+        font-weight: 650;
+    }
+
+    .file-meta {
+        margin-top: 5px;
+        color: var(--muted);
+        font-size: 11px;
+    }
+
+    .remove {
+        padding: 8px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: transparent;
+        color: #ff9292;
+        cursor: pointer;
+    }
+
+    .progress {
+        height: 4px;
+        margin-top: 10px;
+        overflow: hidden;
+        border-radius: 5px;
+        background: #303038;
+    }
+
+    .progress-bar {
+        width: 0;
+        height: 100%;
+        background: var(--accent);
+        transition: width .2s;
+    }
+
+    .actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 20px;
+    }
+
+    .hint {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .status {
+        display: none;
+        margin-top: 18px;
+        padding: 13px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 13px;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+    }
+
+    .status.show {
+        display: block;
+    }
+
+    .status.error {
+        border-color: #743535;
+        color: #ffaaaa;
+    }
+
+    .status.success {
+        border-color: #405d26;
+        color: #c5f89b;
+    }
+
+    .results {
+        margin-top: 24px;
+    }
+
+    .results h3 {
+        margin-bottom: 12px;
+        font-size: 15px;
+    }
+
+    .result-item {
+        margin-top: 10px;
+        padding: 14px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        font-size: 12px;
+    }
+
+    .result-item a {
+        color: var(--accent);
+        overflow-wrap: anywhere;
+    }
+
+    .result-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .secondary {
+        padding: 8px 11px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #1c1c22;
+        color: var(--text);
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    footer {
+        margin-top: 22px;
+        color: #73737e;
+        font-size: 11px;
+        line-height: 1.7;
+        text-align: center;
+    }
+
+    @media (max-width: 480px) {
+        .card {
+            padding: 15px;
+        }
+
+        .dropzone {
+            min-height: 220px;
+        }
+
+        .actions {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .actions .button {
+            width: 100%;
+        }
+    }
+</style>
+
+</head><body>
+<div class="app"><header>
+    <div class="logo">F</div>
+    <div>
+        <h1>FileDrop</h1>
+        <p>Image upload testing platform</p>
+    </div>
+    <span class="badge">FIREBASE</span>
+</header>
+
+<section class="hero">
+    <h2>Upload your files.</h2>
+    <p>
+        Select images from your device and upload them to Firebase Storage.
+        Uploaded file information can be saved in Firestore.
+    </p>
+</section>
+
+<main class="card">
+
+    <label class="dropzone" id="dropzone" for="fileInput">
+        <div class="upload-icon">↥</div>
+        <h3>Drop images here</h3>
+        <p>Or browse files from your device<br>PNG, JPG, WEBP, GIF</p>
+        <span class="button">Choose Images</span>
+    </label>
+
+    <input
+        id="fileInput"
+        type="file"
+        accept="image/*"
+        multiple
+    >
+
+    <div class="file-list" id="fileList"></div>
+
+    <div class="actions">
+        <span class="hint" id="fileCount">No files selected</span>
+        <button class="button" id="uploadButton" disabled>
+            Upload to Firebase ↗
+        </button>
+    </div>
+
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+
+    <section class="results" id="results" hidden>
+        <h3>Uploaded Images</h3>
+        <div id="resultList"></div>
+    </section>
+
+</main>
+
+<footer>
+    Single-file HTML frontend · Firebase Storage + Firestore<br>
+    Configure Firebase and secure your database before production use.
+</footer>
+
+</div><script type="module">
+    /*
+    ============================================================
+    FIREBASE CONFIGURATION
+    Replace these placeholder values with your Firebase project
+    configuration from Firebase Console.
+    ============================================================
+    */
+
+    const firebaseConfig = {
+        apiKey: "YOUR_FIREBASE_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_FIREBASE_APP_ID"
+    };
+
+    /*
+    Firebase SDK imports.
+    These are official Firebase modular SDK CDN imports.
+    */
+
+    import { initializeApp }
+        from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+
+    import {
+        getStorage,
+        ref,
+        uploadBytesResumable,
+        getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-storage.js";
+
+    import {
+        getFirestore,
+        collection,
+        addDoc,
+        serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+    const $ = (id) => document.getElementById(id);
+
+    const fileInput = $("fileInput");
+    const dropzone = $("dropzone");
+    const fileList = $("fileList");
+    const fileCount = $("fileCount");
+    const uploadButton = $("uploadButton");
+    const status = $("status");
+    const results = $("results");
+    const resultList = $("resultList");
+
+    let selectedFiles = [];
+    let uploading = false;
+
+    const MAX_FILE_SIZE = 10 * 1024 * 1024;
+    const MAX_FILES = 10;
+
+    let storage;
+    let db;
+    let firebaseReady = false;
+
+    /*
+    Firebase initialization.
+    Configuration placeholders must be replaced.
+    */
+
+    const firebaseConfig = {
+  apiKey: "AIzaSyBzgMO7xW9QnfIAdfLM1vtbeRQ6eCmD6lE",
+  authDomain: "imgbbtest-fb258.firebaseapp.com",
+  projectId: "imgbbtest-fb258",
+  storageBucket: "imgbbtest-fb258.firebasestorage.app",
+  messagingSenderId: "958023014692",
+  appId: "1:958023014692:web:265716e881727ca3417bb1"
+};
+    if (isConfigured) {
+        try {
+            const app = initializeApp(firebaseConfig);
+            storage = getStorage(app);
+            db = getFirestore(app);
+            firebaseReady = true;
+        } catch (error) {
+            console.error("Firebase initialization failed:", error);
+            showStatus("Firebase initialization failed. Check your configuration.", "error");
+        }
+    }
+
+    function showStatus(message, type = "") {
+        status.textContent = message;
+        status.className = "status show " + type;
+    }
+
+    function formatSize(bytes) {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) {
+            return (bytes / 1024).toFixed(1) + " KB";
+        }
+        return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+    }
+
+    function isImage(file) {
+        return file.type.startsWith("image/");
+    }
+
+    function addFiles(files) {
+        if (uploading) return;
+
+        const incoming = Array.from(files);
+        const valid = [];
+        const rejected = [];
+
+        for (const file of incoming) {
+            if (!isImage(file)) {
+                rejected.push(file.name + ": not an image");
+                continue;
+            }
+
+            if (file.size > MAX_FILE_SIZE) {
+                rejected.push(file.name + ": exceeds 10 MB");
+                continue;
+            }
+
+            if (selectedFiles.length + valid.length >= MAX_FILES) {
+                rejected.push(file.name + ": maximum 10 files");
+                continue;
+            }
+
+            valid.push(file);
+        }
+
+        selectedFiles = [...selectedFiles, ...valid];
+        renderFiles();
+
+        if (rejected.length) {
+            showStatus(
+                "Some files were not added: " + rejected.join("; "),
+                "error"
+            );
+        } else if (valid.length) {
+            showStatus(valid.length + " image(s) ready to upload.");
+        }
+    }
+
+    function renderFiles() {
+        fileList.replaceChildren();
+
+        selectedFiles.forEach((file, index) => {
+            const item = document.createElement("div");
+            item.className = "file-item";
+
+            const thumb = document.createElement("div");
+            thumb.className = "thumbnail";
+
+            const img = document.createElement("img");
+            const objectURL = URL.createObjectURL(file);
+            img.src = objectURL;
+            img.alt = "";
+
+            img.onload = () => URL.revokeObjectURL(objectURL);
+            thumb.appendChild(img);
+
+            const info = document.createElement("div");
+            info.className = "file-info";
+
+            const name = document.createElement("div");
+            name.className = "file-name";
+            name.textContent = file.name;
+
+            const meta = document.createElement("div");
+            meta.className = "file-meta";
+            meta.textContent = formatSize(file.size);
+
+            const progress = document.createElement("div");
+            progress.className = "progress";
+
+            const bar = document.createElement("div");
+            bar.className = "progress-bar";
+            bar.id = "progress-" + index;
+
+            progress.appendChild(bar);
+            info.append(name, meta, progress);
+
+            const remove = document.createElement("button");
+            remove.className = "remove";
+            remove.textContent = "Remove";
+            remove.type = "button";
+            remove.disabled = uploading;
+
+            remove.addEventListener("click", () => {
+                selectedFiles.splice(index, 1);
+                renderFiles();
+            });
+
+            item.append(thumb, info, remove);
+            fileList.appendChild(item);
+        });
+
+        fileCount.textContent = selectedFiles.length
+            ? selectedFiles.length + " file(s) · " +
+              formatSize(selectedFiles.reduce((n, f) => n + f.size, 0))
+            : "No files selected";
+
+        uploadButton.disabled = uploading || selectedFiles.length === 0;
+        uploadButton.textContent = uploading
+            ? "Uploading..."
+            : "Upload to Firebase ↗";
+    }
+
+    fileInput.addEventListener("change", (event) => {
+        addFiles(event.target.files);
+        fileInput.value = "";
+    });
+
+    ["dragenter", "dragover"].forEach(type => {
+        dropzone.addEventListener(type, event => {
+            event.preventDefault();
+            dropzone.classList.add("dragging");
+        });
+    });
+
+    ["dragleave", "drop"].forEach(type => {
+        dropzone.addEventListener(type, event => {
+            event.preventDefault();
+            dropzone.classList.remove("dragging");
+        });
+    });
+
+    dropzone.addEventListener("drop", event => {
+        addFiles(event.dataTransfer.files);
+    });
+
+    function uploadFile(file, index) {
+        return new Promise((resolve, reject) => {
+            /*
+            A unique filename avoids collisions when two users
+            upload files with identical names.
+            */
+
+            const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+            const uniqueName =
+                crypto.randomUUID() + "-" + safeName;
+
+            const fileRef = ref(storage, "uploads/" + uniqueName);
+
+            const task = uploadBytesResumable(fileRef, file, {
+                contentType: file.type
+            });
+
+            task.on(
+                "state_changed",
+
+                snapshot => {
+                    const progress =
+                        (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+
+                    const bar = $("progress-" + index);
+                    if (bar) bar.style.width = progress + "%";
+                },
+
+                error => reject(error),
+
+                async () => {
+                    try {
+                        const url = await getDownloadURL(task.snapshot.ref);
+
+                        /*
+                        Store file metadata in Firestore.
+                        Do not store image binary data in Firestore.
+                        */
+
+                        const docRef = await addDoc(collection(db, "uploads"), {
+                            name: file.name,
+                            storagePath: task.snapshot.ref.fullPath,
+                            url: url,
+                            contentType: file.type,
+                            size: file.size,
+                            createdAt: serverTimestamp()
+                        });
+
+                        resolve({
+                            name: file.name,
+                            url,
+                            documentId: docRef.id
+                        });
+                    } catch (error) {
+                        reject(error);
+                    }
+                }
+            );
+        });
+    }
+
+    function renderResult(result) {
+        const item = document.createElement("div");
+        item.className = "result-item";
+
+        const title = document.createElement("div");
+        title.textContent = result.name;
+
+        const link = document.createElement("a");
+        link.href = result.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = result.url;
+
+        const actions = document.createElement("div");
+        actions.className = "result-actions";
+
+        const copy = document.createElement("button");
+        copy.className = "secondary";
+        copy.textContent = "Copy URL";
+
+        copy.addEventListener("click", async () => {
+            try {
+                await navigator.clipboard.writeText(result.url);
+                copy.textContent = "Copied!";
+            } catch {
+                showStatus("Unable to copy automatically. Select the URL manually.", "error");
+            }
+        });
+
+        actions.appendChild(copy);
+        item.append(title, link, actions);
+        resultList.prepend(item);
+
+        results.hidden = false;
+    }
+
+    uploadButton.addEventListener("click", async () => {
+        if (uploading || selectedFiles.length === 0) return;
+
+        if (!firebaseReady) {
+            showStatus(
+                "Firebase is not configured. Replace the placeholder configuration with your real Firebase project settings.",
+                "error"
+            );
+            return;
+        }
+
+        uploading = true;
+        uploadButton.disabled = true;
+        renderFiles();
+
+        const filesToUpload = [...selectedFiles];
+        const successful = [];
+        const failed = [];
+
+        showStatus("Uploading " + filesToUpload.length + " image(s)...");
+
+        /*
+        Sequential uploads keep progress easy to follow and
+        avoid starting every transfer simultaneously.
+        */
+
+        for (let i = 0; i < filesToUpload.length; i++) {
+            try {
+                const result = await uploadFile(filesToUpload[i], i);
+                successful.push(result);
+                renderResult(result);
+            } catch (error) {
+                console.error("Upload failed:", error);
+                failed.push(filesToUpload[i].name + ": " + error.message);
+            }
+        }
+
+        uploading = false;
+        selectedFiles = [];
+        renderFiles();
+
+        if (failed.length === 0) {
+            showStatus(
+                successful.length + " image(s) uploaded successfully and their details saved to Firestore.",
+                "success"
+            );
+        } else {
+            showStatus(
+                successful.length + " uploaded. " +
+                failed.length + " failed: " + failed.join("; "),
+                "error"
+            );
+        }
+    });
+
+    renderFiles();
+</script></body>
+</html>
