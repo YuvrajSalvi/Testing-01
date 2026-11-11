@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - Dental Care Pro</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; color: #333; }
+        header { background: #0056b3; color: white; padding: 2rem; text-align: center; }
+        nav { display: flex; justify-content: center; background: #e9ecef; padding: 1rem; }
+        nav a { margin: 0 1rem; text-decoration: none; color: #0056b3; font-weight: bold; }
+        .content { padding: 2rem; max-width: 600px; margin: auto; }
+        form { display: flex; flex-direction: column; }
+        input, select, textarea { margin-bottom: 1rem; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Dental Care Pro</h1>
+    </header>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="services.html">Services</a>
+        <a href="contact.html">Contact</a>
+    </nav>
+    <div class="content">
+        <h2>Book an Appointment</h2>
+        <form id="appointmentForm" onsubmit="event.preventDefault(); alert('Appointment Request Submitted! We will call you back.');">
+            <input type="text" placeholder="Full Name" required>
+            <input type="email" placeholder="Email Address" required>
+            <input type="tel" placeholder="Phone Number" required>
+            <select>
+                <option>Select Service</option>
+                <option>Dental Cleaning</option>
+                <option>Teeth Whitening</option>
+                <option>Check-up</option>
+            </select>
+            <textarea placeholder="Any comments?" rows="4"></textarea>
+            <button type="submit">Submit Request</button>
+        </form>
+    </div>
+</body>
+</html>
